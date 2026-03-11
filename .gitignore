@@ -1,0 +1,14 @@
+node_modules/
+public/
+resources/
+
+.hugo_build.lock
+
+# Playwright
+playwright-report/
+test-results/
+
+# Agent
+.agent
+.claude
+.codebuddy
