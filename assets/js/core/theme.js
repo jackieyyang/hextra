@@ -3,11 +3,17 @@
   const defaultTheme = '{{ site.Params.theme.default | default `system`}}'
   const themes = ["light", "dark"];
 
+  // Resolve "system" or any non light/dark value to the actual theme based on system preference
+  function resolveTheme(theme) {
+    if (themes.includes(theme)) return theme;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
   const themeToggleButtons = document.querySelectorAll(".hextra-theme-toggle");
   const themeToggleOptions = document.querySelectorAll(".hextra-theme-toggle-options button[role=menuitemradio]");
 
   function applyTheme(theme) {
-    theme = themes.includes(theme) ? theme : "system";
+    theme = resolveTheme(theme);
 
     themeToggleButtons.forEach((btn) => btn.parentElement.dataset.theme = theme );
     themeToggleOptions.forEach((option) => {
@@ -22,8 +28,8 @@
     applyTheme(theme);
   }
 
-  const colorTheme = "color-theme" in localStorage ? localStorage.getItem("color-theme") : defaultTheme;
-  switchTheme(colorTheme);
+  const savedTheme = "color-theme" in localStorage ? localStorage.getItem("color-theme") : defaultTheme;
+  switchTheme(resolveTheme(savedTheme));
 
   // Add click event handler to the menu items.
   themeToggleOptions.forEach((option) => {
@@ -103,10 +109,11 @@
     });
   });
 
-  // Listen for system theme changes
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    if (localStorage.getItem("color-theme") === "system") {
-      setTheme("system");
+  // Listen for system theme changes when no default is configured
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    if (!defaultTheme || defaultTheme === 'system') {
+      const newTheme = e.matches ? "dark" : "light";
+      switchTheme(newTheme);
     }
   });
 })();
